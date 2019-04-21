@@ -11,7 +11,7 @@ for ( var item in config ) {
 
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded( {
-    extended: true
+    extended: true,limit: '50mb'
 } ) );
 
 require( './src/api' )( app );

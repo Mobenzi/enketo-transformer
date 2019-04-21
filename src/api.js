@@ -12,6 +12,7 @@ const request = require( 'request' );
 const express = require( 'express' );
 const router = express.Router();
 const transformer = require( './transformer' );
+const validator = require('enketo-validate');
 
 router
     .get( '/', ( req, res ) => {
@@ -68,7 +69,27 @@ router
                     res.status( error.status ).send( `${error.message} (stack: ${error.stack})` );
                 } );
         }
-    } );
+    } )
+    .post( '/validate/', ( req, res ) => {
+        // NOTE: req.query.xform is an XML string
+        if ( req.app.get( 'secure' ) ) {
+            res.status( 405 ).send( 'Not Allowed' );
+        } else if ( !req.body.xform ) {
+            res.status( 400 ).send( 'Bad Request.' );
+        } else {
+            // allow requests from anywhere
+            res.set( 'Access-Control-Allow-Origin', '*' );
+
+            var result = validator.validate( req.body.xform, {
+                    oc: false,
+		    debug: false
+            } );
+            
+            res.json( result );
+        }
+    } )
+
+;
 
 /**
  * Sends a request to an OpenRosa server. Only for basic retrieval of 
